@@ -40,7 +40,7 @@ const resetPosition = assign({
 
 const dragDropMachine = createMachine({
   // The initial state should check auth status instead.
-  initial: 'idle',
+  initial: 'checkingAuth',
   context: {
     x: 0,
     y: 0,
@@ -54,6 +54,27 @@ const dragDropMachine = createMachine({
     // Add two states:
     // - checkingAuth (with transient transitions)
     // - unauthorized
+    checkingAuth: {
+      on: {
+        '': [
+          {
+            target: 'idle',
+            cond: 'hasUser'
+          },
+          {
+            target: 'unauthorized'
+          }
+        ]
+      }
+    },
+    unauthorized: {
+      on: {
+        login: {
+          actions: 'addUser',
+          target: 'checkingAuth'
+        }
+      }
+    },
     idle: {
       on: {
         mousedown: {
@@ -78,6 +99,15 @@ const dragDropMachine = createMachine({
       },
     },
   },
+},{
+  actions: {
+    addUser: assign({
+      user: true
+    })
+  },
+  guards: {
+    hasUser: (context, event) => context.user
+  }
 });
 
 const service = interpret(dragDropMachine);
@@ -114,3 +144,7 @@ elBody.addEventListener('keyup', (e) => {
     service.send('keyup.escape');
   }
 });
+
+document.querySelector('#button').addEventListener('click', () => {
+  service.send('login')
+})
