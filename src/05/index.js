@@ -11,7 +11,8 @@ const machine = createMachine({
     dx: 0,
     dy: 0,
     px: 0,
-    py: 0
+    py: 0,
+    drags: 0
   },
   states: {
     idle: {
@@ -19,6 +20,7 @@ const machine = createMachine({
         mousedown: {
           actions: "assignStart",
           target: 'dragging',
+          cond: 'dragIsAllowed'
         },
       },
     },
@@ -49,6 +51,7 @@ const machine = createMachine({
     "assignStart": assign({
       px: (context, event) => event.clientX,
       py: (context, event) => event.clientY,
+      drags: (context, event) => context.drags + 1
     }),
     "assignDelta": assign({
       dx: (context, event) => event.clientX - context.px,
@@ -62,6 +65,9 @@ const machine = createMachine({
       px: 0,
       py: 0,
     })
+  },
+  guards: {
+    "dragIsAllowed": (context, event) => context.drags < 3
   }
 });
 
