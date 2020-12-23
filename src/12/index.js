@@ -24,8 +24,18 @@ const machine = createMachine({
     },
     pending: {
       invoke: {
-        // Invoke your promise here.
-        // The `src` should be a function that returns the source.
+        src: (context, event) => {
+          return randomFetch()
+        },
+        onDone: {
+          target: 'resolved',
+          actions: (_, event) => {
+            console.log(event)
+          }
+        },
+        onError: {
+          target: 'rejected'
+        }
       },
     },
     resolved: {
